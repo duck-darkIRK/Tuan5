@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+
 void main() {
   runApp(const MyApp());
 }
@@ -18,9 +19,35 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: ProductListScreen(),
+      home: HomeScreen(),
+      // home: ProductListScreen(),
     );
   }
+}
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar (
+        title: Text("Trang chu"),
+      ),
+      body: Center(
+        child: ElevatedButton (
+          onPressed: (){
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ProductListScreen()),
+            );
+          },
+          child: Text("Go to ProductListScreen"),
+        ),
+      ),
+    );
+
+  }
+
+
 }
 
 class ProductListScreen extends StatefulWidget {
@@ -55,7 +82,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
   // --fetch
   Future<void> fetchProducts() async {
-    final response = await http.get(Uri.parse("http://192.168.1.3/aserver/api.php"));
+    final response = await http.get(Uri.parse("http://172.24.0.1/aserver/api.php"));
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       setState(() {
@@ -93,11 +120,75 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 height: 50,
                 fit: BoxFit.cover
             ),
+            onTap: () {
+              Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ProductDetailScreen(products[index])),
+              );
+            },
           );
         },
       ) : Center(
         child: CircularProgressIndicator(),
       ),
+    );
+  }
+}
+
+class ProductDetailScreen extends StatelessWidget {
+  final Product product;
+  ProductDetailScreen(this.product);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Product Detail'),
+        actions: [
+          ElevatedButton(onPressed: () {
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context) => CartSceen()
+            ));
+          },
+              child: Icon(Icons.shopping_cart),
+              style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                  padding: EdgeInsets.all(0)
+              )
+          ),
+
+        ],
+
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(padding: const EdgeInsets.all(8),
+            child: Text('Nhanh ${product.brands_filter_facet}'),
+          ),
+          Image.network(product.search_image),
+          Padding(padding: const EdgeInsets.all(8),
+            child: Text(
+              product.product_additional_info,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(padding: const EdgeInsets.all(8),
+            child: Text('ID: ${product.styleid}'),
+          ),
+          Padding(padding: const EdgeInsets.all(8),
+            child: Text('Price: ${product.price}'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CartSceen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Shopping Cart"),),
+      body: Center(child: Text("Gio hang cua ban"),),
     );
   }
 }
